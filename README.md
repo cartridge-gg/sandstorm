@@ -16,11 +16,10 @@ Sandstorm is a Cairo prover built on top of miniSTARK. The prover was built by r
 ## Demo - proving Cairo programs
 
 | ![Generating a proof](prover.gif) | ![Verifying a proof](verifier.gif) |
-|:--:|:--:|
-| *Generating the proof* | *Verifying the proof* 
+| :-------------------------------: | :--------------------------------: |
+|      _Generating the proof_       |       _Verifying the proof_        |
 
 In this demo, the prover has a Cairo program that appears to sum the values of an array. The prover runs the program with `cairo-run` to generate `trace.bin` (stores register values at each VM cycle) and `memory.bin` (stores memory address value pairs). The prover then runs `sandstorm prove` which builds a STARK execution trace and proof from `trace.bin`, `memory.bin` and the compiled program.
-
 
 The verifier, supplied with this proof and the original code, can run `sandstorm verify` to assert the program was executed correctly without having to run the program themselves. This is a small program for demonstration purposes and it'd probably be faster for the verifier to run the program themselves. Sandstorm is capable of generating proofs for much larger programs, where proof verification would run orders of magnitude faster than running the program. To run this demo locally:
 
@@ -75,7 +74,7 @@ cairo-compile example/array-sum.cairo \
         --proof_mode
 
 # 3. modify the Cairo runner to support Goldilocks
-# there are a few overly protective asserts that need to be commented out to get 
+# there are a few overly protective asserts that need to be commented out to get
 # things working. The location of these files is based on where you installed Cairo.
 # For me they were in `~/cairo_venv/lib/python3.9/site-packages/starkware/cairo/`.
 # Remove or comment out the following asserts:
@@ -101,6 +100,7 @@ cargo +nightly run -r -F parallel,asm -- \
     --program example/array-sum.json \
     verify --proof example/array-sum.proof
 ```
+
 </details>
 
 <details>
@@ -109,6 +109,7 @@ cargo +nightly run -r -F parallel,asm -- \
 ## How Sandstorm works
 
 Those curious about the inner workings of Sandstorm can read the comments in [air.rs](layouts/src/starknet/air.rs#115). The comments expect some understanding of how STARK proofs are generated - if you need some background on this then [Anatomy of a STARK (part 4)](https://aszepieniec.github.io/stark-anatomy/) by [Alan Szepieniec](https://twitter.com/aszepieniec) is a great resource. The pseudo code in section 4.5 of the [Cairo whitepaper](https://eprint.iacr.org/2021/1063.pdf) provides a nice high level overview of how some pieces fit together.
+
 </details>
 
 <details>
@@ -117,4 +118,23 @@ Those curious about the inner workings of Sandstorm can read the comments in [ai
 ## Running on ARM64
 
 When running on ARM64 (i.e. Mac M1/M2), remove the `asm` feature from the example cli calls.
+
 </details>
+
+## Docker
+
+```bash
+podman build -t prover -f prover.dockerfile .
+```
+
+```bash
+podman run -i prover < program_input.json > proof.bin
+```
+
+```bash
+podman build -t verifier -f verifier.dockerfile .
+```
+
+```bash
+podman run -i verifier < proof.bin
+```

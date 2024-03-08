@@ -2,4 +2,5 @@
 /tmp
 *.proof
 Cargo.lock
+*.dockerfile
 *.bin
